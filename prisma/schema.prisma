@@ -1,0 +1,72 @@
+// schema.prisma
+
+datasource db {
+  provider = "postgresql" // Changez pour votre base de données ("mysql", "sqlite", etc.)
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Guild {
+  guildId   BigInt   @id @default(autoincrement())
+  guildName String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  settings     GuildSettings?
+  commandLogs  CommandLog[]
+  userSettings UserSettings[]
+}
+
+model User {
+  userId        BigInt   @id @default(autoincrement())
+  username      String
+  discriminator String   @map("discriminator") // Le numéro d'utilisateur Discord
+  createdAt     DateTime @default(now())
+
+  // Relations
+  commandLogs  CommandLog[]
+  userSettings UserSettings[]
+}
+
+model GuildSettings {
+  id               Int     @id @default(autoincrement())
+  prefix           String  @default("!")
+  language         String  @default("en")
+  welcomeChannelId BigInt?
+  logChannelId     BigInt?
+
+  // Foreign Key
+  guildId BigInt @unique
+  guild   Guild  @relation(fields: [guildId], references: [guildId], onDelete: Cascade)
+}
+
+model UserSettings {
+  id                   Int     @id @default(autoincrement())
+  customPrefix         String?
+  notificationsEnabled Boolean @default(true)
+
+  // Foreign Keys
+  guildId BigInt
+  userId  BigInt
+  guild   Guild  @relation(fields: [guildId], references: [guildId], onDelete: Cascade)
+  user    User   @relation(fields: [userId], references: [userId], onDelete: Cascade)
+
+  @@unique([guildId, userId]) // Un utilisateur unique par serveur
+}
+
+model CommandLog {
+  id          Int      @id @default(autoincrement())
+  commandName String
+  commandArgs String?
+  executedAt  DateTime @default(now())
+
+  // Foreign Keys
+  guildId BigInt?
+  userId  BigInt?
+  guild   Guild?  @relation(fields: [guildId], references: [guildId], onDelete: SetNull)
+  user    User?   @relation(fields: [userId], references: [userId], onDelete: SetNull)
+}
