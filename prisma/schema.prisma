@@ -10,7 +10,7 @@ generator client {
 }
 
 model Guild {
-  guildId   BigInt   @id @default(autoincrement())
+  guildId   String   @id
   guildName String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -22,7 +22,7 @@ model Guild {
 }
 
 model User {
-  userId        BigInt   @id @default(autoincrement())
+  userId        String   @id
   username      String
   discriminator String   @map("discriminator") // Le numéro d'utilisateur Discord
   createdAt     DateTime @default(now())
@@ -40,7 +40,7 @@ model GuildSettings {
   logChannelId     BigInt?
 
   // Foreign Key
-  guildId BigInt @unique
+  guildId String @unique
   guild   Guild  @relation(fields: [guildId], references: [guildId], onDelete: Cascade)
 }
 
@@ -50,8 +50,8 @@ model UserSettings {
   notificationsEnabled Boolean @default(true)
 
   // Foreign Keys
-  guildId BigInt
-  userId  BigInt
+  guildId String
+  userId  String
   guild   Guild  @relation(fields: [guildId], references: [guildId], onDelete: Cascade)
   user    User   @relation(fields: [userId], references: [userId], onDelete: Cascade)
 
@@ -65,8 +65,8 @@ model CommandLog {
   executedAt  DateTime @default(now())
 
   // Foreign Keys
-  guildId BigInt?
-  userId  BigInt?
+  guildId String?
+  userId  String?
   guild   Guild?  @relation(fields: [guildId], references: [guildId], onDelete: SetNull)
   user    User?   @relation(fields: [userId], references: [userId], onDelete: SetNull)
 }
